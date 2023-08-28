@@ -1,5 +1,3 @@
-
-
 ## 1. Task Requirement
 
  1. Install and configure Ldap 389 DS in the containerised platform with persistence storage
@@ -11,79 +9,129 @@
 
 ## 2. Environment Detail
 
-- #### Server Info:-
-    Os version
-    NAME="Ubuntu"
-    VERSION="20.04.6 LTS (Focal Fossa)"
-    podman version 3.4.2
+ ### Server Info
+OS Version
 
-- #### Client Info:-
-    NAME="Ubuntu"
-    VERSION="20.04.6 LTS (Focal Fossa)"
+Name="Ubuntu"
 
-## 3. List of Tools:-
+Version="20.04.6 LTS (Focal Fossa)"
+
+Podman Version 3.4.2
+
+Ldap version:- 3
+
+Apache Directory Studio version:- 2.0.0.v20210717-M17
+
+### Client Info
+OS Version
+
+Name="Ubuntu"
+
+Version="20.04.6 LTS (Focal Fossa)"
+
+Podman Version 3.4.2
+
+Ldap version:- 3
+
+Apache Directory Studio version:- 2.0.0.v20210717-M17
+
+## 3. List of Tools
 1. Podman
 2. Ldap
 3. Apache Directory Studio
-
-**Ldap version:- 3**
- Apache Directory Studio version:- 2.0.0.v20210717-M17
+   
 
 ## 4. Definition of tools
 
-#### Podman
+### Podman
 
 Podman is an open-source containerization tool that manages containers and images, supporting features like pod management, rootless containers, and a daemonless architecture.
    
-#### LDAP
+### LDAP
 
 SSThe Lightweight Directory Access Protocol is a communication protocol used to access directory servers and is used to store, update and retrieve data from a directory structure.
 
 
-#### Apache Directory Studio
+### LDAP architecture diagram
+<img src="img/Default View.bmp" alt="Image Description" width="1260px">
+
+
+### Apache Directory Studio
 
 Apache Directory Studio is an open-source LDAP client with a graphical interface for managing and interacting with LDAP directories.
 
 ## 5. Command for the setup or configuration
 
 ### [5.1]. Create Bash script for create Pod and container
-    cat  ldap.sh
-    Bash script :-
-    #!/bin/bash
-    #create pod with name ldap389
-    podman pod create --name ldap389 --publish 3389:3389 --publish 3636:3636
-    #create container
-    podman run -dt\
-    --pod ldap389 \
-    --name 389ds-ldap \
-    -v ~/389ds/data:/data \
-    -e DS_SUFFIX=dc=keenable, dc=in \
-    -e DS_DM_PASSWORD=<password> \
-    docker.io/389ds/dirsrv
-    >In Pod we have set port 3389 and 3636
-    >In container we have set base Dn as keenable.in and set password of dn
+cat  ldap.sh
 
+Bash script :-
+        
+        #!/bin/bash
+        #create pod with name ldap389
+        podman pod create --name ldap389 --publish 3389:3389 --publish 3636:3636
+        #create container
+        podman run -dt\
+        --pod ldap389 \
+        --name 389ds-ldap \
+        -v ~/389ds/data:/data \
+        -e DS_SUFFIX=dc=keenable, dc=in \
+        -e DS_DM_PASSWORD=<password> \
+        docker.io/389ds/dirsrv
+
+- **ldap389** Created a pod named
+- **#!/bin/bash:** This is called a shebang and specifies that the script should be executed using the Bash shell.
+- **podman pod create --name ldap389 --publish 3389:3389 --publish 3636:3636:**
+- **podman:** This is the command-line tool used to manage pods and containers.
+- **pod create:** This subcommand is used to create a new pod.
+- **-name ldap389:** This option specifies the name of the pod as "ldap389".
+- **-publish 3389:3389 --publish 3636:3636:** These options publish the
+    
+    specified container ports to the host. Ports 3389 and 3636 are mapped from the host to the pod. This allows services running inside the pod to be accessed from the host using these ports.
+    
+- **podman run -dt:** This command runs a container.
+    - **d:** Detaches the container from the terminal, allowing it to run in the background.
+    - **t:** Allocates a pseudo-TTY, which helps with handling input/output.
+- **-pod ldap389:** This option specifies that the container should be created within the "ldap389" pod that was created earlier.
+- **-name 389ds-ldap:** This sets the name of the container to "389ds-ldap".
+- **v ~/389ds/data:/data:** This mounts the directory **~/389ds/data** from the host into the container at the **/data** directory. This is used for data persistence, allowing data to be stored on the host filesystem.
+- **e DS_SUFFIX=dc=keenable,dc=in:** This sets the environment variable **DS_SUFFIX** within the container to specify the LDAP directory suffix.
+- **e DS_DM_PASSWORD=<password>:** This sets the environment variable **DS_DM_PASSWORD** within the container to specify the password for the Directory Manager of the LDAP server.
+- **docker.io/389ds/dirsrv:** This is the Docker image that will be used to create the container. It's the 389 Directory Server image from Docker Hub.
+
+ In Pod we have set port 3389 and 3636
+
+ In container we have set base Dn as keenable.in and set password of dn
 
 
 #####  a. Check container list
 
-    cmd:- podman ps -a –pod
+        podman ps -a --pod
 
 ##### b. Install Ldap utility on bash machine
 
-    cmd:- sudo apt install ldap-utils
+        sudo apt install ldap-utils
+
+
+- **sudo:** This command is used to run with superuser (root) privileges.
+- **apt:** It's used to manage software packages, including installation, updating, and removal.
+- **install:** This is an argument passed to the apt command, indicating that you want to install a package.
+- **ldap-utils:** This is a collection of command-line utilities for interacting with LDAP (Lightweight Directory Access Protocol) servers. These utilities are useful for managing and querying directory services.
+
+  
 
 ### [5.2].  Setup ApacheDirectory studio for ldap db UI
 
-**a. Install ApacheDirectory studio tar file and extract in directory**
 
- **b. Go to new connection and enter some details**
-    ldap connection name
-    Hostname
-    ldap port > Press next 
-    Enter Bind DN name (cn= Directory Manager) 
-    Enter Bind DN password -> finish
+ a. Install [ApacheDirectory studio tar](https://directory.apache.org/studio/download/download-linux.html) file and extract in directory  
+ b. open apache directory  
+ c. Go to new connection and enter some details
 
+        ldap connection name
+        Hostname -> localhost
+        ldap port > Press next (3389)
+        Enter Bind DN name (cn= Directory Manager) 
+        Enter Bind DN password -> finish
 
 ### [5.3].Create Organization_unit ldif file (file extension name , ldif ) 
 
@@ -146,22 +194,51 @@ Apache Directory Studio is an open-source LDAP client with a graphical interface
     ldapadd -a -c -xH ldap://localhost:3389 -D "cn=Directory Manager" -W  -f group.ldif
 
 
+- **ldapadd:** This command is used to add new entries to an LDAP directory server.
+- **a:** It's used for adding new data without overwriting existing data.
+- **c**:If the LDAP server has a schema, this option helps ensure that the data conforms to the defined schema.
+- **x:** This option specifies that simple authentication should be used. Similar to -**x** in **ldapsearch**, it's used for quick testing,
+- **H ldap://localhost:3389:** This option specifies the LDAP URI (Uniform Resource Identifier) of the LDAP server. It's connecting to the LDAP server running on the local machine (**localhost**) at port **3389.**
+- **D "cn=Directory Manager":** This option specifies the Bind DN (Distinguished Name) to authenticate with the LDAP server. In this case, it's using the "Directory Manager" account to authenticate.
+- **W:** This option prompts you to enter the password for the Bind DN interactively after providing the -D option. It's safer than putting the password in the command line itself.
+- **f organisation.ldif**: This option specifies the name of the LDIF (LDAP Data Interchange Format) file that contains the data to be added to the LDAP server. The **f** option is followed by the filename **(organisation.ldif** in this case).
+
+
 ### [5.5]. Run some Command of ldap
 
 - **a. First check how many default object class created**
 
          ldapsearch -o ldif-wrap=no -xH ldap://localhost:3389 -D "cn=Directory Manager" -w "redhat@" -b "cn=schema" '(objectClass=subSchema)' -s sub objectclasses
 
+
+- **ldapsearch:** This command is used to search and retrieve information from an LDAP directory server.
+- **o ldif-wrap=no:** This option turns off LDIF (LDAP Data Interchange Format) line wrapping. It ensures that the output LDIF is not formatted with line breaks, which can be useful for processing the output programmatically.
+- **D "cn=Directory Manager"**: This option specifies the Bind DN (Distinguished Name) to authenticate with the LDAP server. In this case, it's using the "Directory Manager" account to authenticate.
+- **w "redhat@"**: This option specifies the password for the Bind DN. The password is provided directly in the command line using double quotes.
+- **b "cn=schema"**: This option specifies the base DN (Distinguished Name) from which the search should start. It's set to **"cn=schema"** which indicates that the search should start from the schema entry.
+- **'(objectClass=subSchema)**': This is the search filter. It specifies that the search should retrieve entries with the **objectClass** attribute equal to **subSchema**. This filter targets the schema definition entries.
+- **s sub**: This option sets the search scope. In this case, it's set to "sub" which means a subtree search, i.e., it searches for the specified filter under the specified base DN and all its subordinates.
+- **objectclasses:** This is the attribute(s) we want to retrieve from the entries that match the search filter. In this case, we're requesting the **objectclasses** attribute.
+
+
+
 - **b. Check how many default attributes created**
 
         ldapsearch -o ldif-wrap=no -xH ldap://localhost:3389 -D "cn=Directory Manager" -w "redhat@" -b "cn=schema" '(objectClass=subSchema)' -s sub attributetypes
 
 
+- **o ldif-wrap=no:** This option turns off LDIF (LDAP Data Interchange Format) line wrapping. It ensures that the output LDIF is not formatted with line breaks, which can be useful for processing the output programmatically.
+- **D "cn=Directory Manager":** This option specifies the Bind DN (Distinguished Name) to authenticate with the LDAP server. In this case, it's using the "Directory Manager" account to authenticate.
+- **b "cn=schema"**: This option specifies the base DN (Distinguished Name) from which the search should start. It's set to **"cn=schema"** which indicates that the search should start from the schema entry.
+- **'(objectClass=subSchema)'**: This is the search filter. It specifies that the search should retrieve entries with the **objectClass** attribute equal to **subSchema.** This filter targets the schema definition entries.
+- **attributetypes:** This is the attribute(s)we  want to retrieve from the entries that match the search filter. In this case, we 're requesting the **attributetypes** attribute.
+
+
 ### [5.6].  Create Custom attribute according to our requirement
 
-- **a. Create customer attribute ldif file**
+  **a. Create customer attribute ldif file**
 
-        Example:-
+Example:-
 
         dn: cn=schema
         changetype: modify
@@ -175,25 +252,30 @@ Apache Directory Studio is an open-source LDAP client with a graphical interface
         attributetypes: (correspondence_address-oid  NAME 'CorrespondenceAddress' DESC 'CorrespondenceAddress' EQUALITY caseIgnoreMatch SUBSTR caseExactSubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{100} SINGLE-VALUE X-ORIGIN 'user defined')
 
 
-- **b. Add this file to ldap db**
+  **b. Add this file to ldap db**
 
-        ldadadd -a -c -xH ldap://localhost:3389 -D "cn=Directory Manager" -W  -f < attribute file>
+        ldadadd -a -c -xH ldap://localhost:3389 -D "cn=Directory Manager" -W  -f custom_attribute.ldif
 
-- **c. Create Object class file for add attribute to object class**
+  **c. Create Object class file for add attribute to object class**
 
         dn: cn=schema
         changetype: modify
         add: objectClasses
         objectClasses: ( customEmployee-oid NAME 'customEmployee' SUP top STRUCTURAL MUST ( EmployeeCode $ DateofJoining $ Gender $ DateofBirth $ Panno $ Qualification $ YearsofQualification $ ProfessionalStartYEARS $ YEARSOfExperience $ CorrespondenceAddress $ personalemail-id $ mobileno $ MaritalStatus $ BankName $ AccountNo $ IFSCCode $ documentssubmitted) MAY ( DateOfResignation $ Certifications $ PassportNo $ PassportValidupto $ AadhaarNo $ facebookaccount $ twitteraccount $ Childinfo $ pfno $ UANno $ ESICCardNo $ InsuranceMonthlyAmountDeductionINR $ FamilyMembersInsured $ dateofjoiningasintern $ ProjectName )  X-ORIGIN 'user defined')
 
-- **d. Add object class ldif file**
+  **d. Add object class ldif file**
+  
+        ldadadd -a -c -xH ldap://localhost:3389 -D "cn=Directory Manager" -W  -f object_class.ldif
 
-        ldadadd -a -c -xH ldap://localhost:3389 -D "cn=Directory Manager" -W  -f <objectclass name>
+
+- **f object_class.ldif:** This option specifies the name of the LDIF (LDAP Data Interchange Format) file that contains the data to be added to the LDAP server. The -f option denotes the filename
+
 
 
 
 ### [5.7]. Create user with custom attribute
-	    cat  **custom_attribute.ldif**
+cat user1.ldifcat
+
         dn: uid=001,ou=dev,dc=keenable,dc=in
         objectClass: top
         objectClass: inetOrgPerson
@@ -219,17 +301,27 @@ Apache Directory Studio is an open-source LDAP client with a graphical interface
         BankName: PNB
         AccountNo: 1100110011
         IFSCCode: KKBK0053
-        > In this file we have gave objectclass name and must custom attribute
+
+
+> In this file we have gave objectclass name and must custom attribute
+
     
-- **a. After that add user to db**
+**a. After that add user to db**
 
         ldapadd -a -c -xH ldap://localhost:3389 -D "cn=Directory Manager" -W  -f custom_attribute.ldif
 
-- **b. Check user reflected or not through ldapsearch command**
+- **f user1.ldif:** This option specifies the name of the LDIF (LDAP Data Interchange Format) file that contains the data to be added to the LDAP server. The -f option is followed by the filename (**user1.ldif** in this case).
+
+**b. Check user reflected or not through ldapsearch command**
 
         ldapsearch -x -D "cn=Directory Manager" -W -H ldap://192.168.29.221:3389 -b "ou=dev,dc=keenable,dc=in" -s sub "(uid=001)"
 
-Output look like th
+
+- **b "ou=dev,dc=keenable,dc=in"**: This option specifies the base DN (Distinguished Name) from which the search should start. It's set to **"ou=dev,dc=keenable,dc=in"** which indicates that the search should start from the "ou=dev" organizational unit under the base DN "dc=keenable,dc=in".
+- **s sub:** This option sets the search scope. In this case, it's set to "sub" which means a subtree search,
+
+
+**Output look like this**
 
         # extended LDIF
         #
@@ -283,41 +375,46 @@ Output look like th
 
 ### [5.8]. Setup ldap Client on another VM
 
-     a. Install package related to ldap client
+a. Install package related to ldap client
 
-        Cmd:- sudo apt -y install libnss-ldap libpam-ldap ldap-utils
+         sudo apt -y install libnss-ldap libpam-ldap ldap-utils
 
-     b. After run this command we get one pop up screen
 
-        > Enter LDAP URI:  IP address or hostname
-        > Enter Set a Distinguished name(dn) of the search base
+- **Libnss-ldap:** It provides the necessary libraries to enable the LDAP (Lightweight Directory Access Protocol) Name Service Switch (NSS) module. This module allows us to use LDAP as a source for user, group, and other system information.
+- **libpam-ldap:** It provides the necessary libraries to enable the LDAP Pluggable Authentication Module (PAM) module. This module allows us to use LDAP for user authentication.
+- **ldap-utils:** This is a collection of command-line utilities for interacting with LDAP servers. These utilities are useful for managing and querying directory services.
 
-     c. Open /etc/nslcd.conf and check configuration 
+b. After run this command we get one pop up screen
 
-            uid nslcd
+       > Enter LDAP URI:  IP address or hostname
+
+       > Enter Set a Distinguished name(dn) of the search base
+
+c. Open **/etc/nslcd.conf** and check configuration 
+
+        uid nslcd
         gid nslcd
         uri ldap: ldap server ip or hostname
         Hostname
         base dc =,dc=  # acc to server base Dn
 
-     d. Restart nslcd and nscd service 
+d. Restart nslcd and nscd service 
 
-     e. Run getent passwd command to check server user reflect or not
+        sudo systemctl restart nslcd
+
+**nslcd** stands for Name Service LDAP Client Daemon. It is responsible for querying LDAP directories (such as OpenLDAP) for user and group information and providing it to local processes and services.
+
+e. Run getent passwd command to check server user reflect or not
 
         getent passwd | grep 001
         001:*:1:1:rahul:/home/:
 
-## 6. LDAP architecture diagram
-<img src="img/image.png" alt="Image Description" width="1260px">
 
 
-## 7. Reference Link:-
+## 6. Reference Link
 
 For Understand Ldap:- https://www.windows-active-directory.com/active-directory-ldap.html
 
 For Attribute Syntax:- https://ldap.com/attribute-syntaxes/
 
 For Client Setup:- https://computingforgeeks.com/how-to-configure-ubuntu-as-ldap-client/?expand_article=1&expand_article=1
-
-
-
